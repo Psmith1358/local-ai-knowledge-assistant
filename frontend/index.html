@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Local AI Knowledge Assistant</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f1ea;
+            color: #1f2933;
+        }
+
+        .app {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 24px;
+        }
+
+        .header {
+            background: white;
+            border: 1px solid #ddd6cc;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #5f6b7a;
+        }
+
+        .chat-box {
+            background: white;
+            border: 1px solid #ddd6cc;
+            border-radius: 12px;
+            padding: 24px;
+            min-height: 300px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 16px;
+            border-radius: 10px;
+            line-height: 1.5;
+        }
+
+        .user {
+            background: #315f72;
+            color: white;
+            margin-left: 20%;
+        }
+
+        .assistant {
+            background: #ebe6dc;
+            color: #1f2933;
+            margin-right: 20%;
+        }
+
+        .label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 12px;
+        }
+
+        textarea {
+            flex: 1;
+            height: 70px;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd6cc;
+            border-radius: 8px;
+            resize: vertical;
+        }
+
+        button {
+            padding: 12px 22px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #315f72;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .secondary-button {
+            background: #ebe6dc;
+            color: #1f2933;
+            border: 1px solid #ddd6cc;
+}
+
+.secondary-button:hover {
+    background: #ddd6cc;
+}
+
+        button:hover {
+            background: #244857;
+        }
+
+        .loading {
+            color: #5f6b7a;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+
+        <div class="header">
+            <h1>Local AI Knowledge Assistant</h1>
+            <p>
+                Ask questions and receive responses from a locally hosted Llama 3.1 model through a FastAPI backend.
+            </p>
+        </div>
+
+        <div id="chat" class="chat-box">
+            <div class="message assistant">
+                <span class="label">AI Assistant</span>
+                Ask me a question about business, operations, planning, or documents.
+            </div>
+        </div>
+
+       <div class="input-area">
+            <textarea
+            id="question"
+            placeholder="Type your question here..."
+            onkeydown="handleKeyPress(event)">
+        </textarea>
+            <button onclick="askAI()">Ask</button>
+            <button class="secondary-button" onclick="clearChat()">Clear</button>
+        </div>
+
+    <script>
+        async function askAI() {
+
+            const questionBox = document.getElementById("question");
+            const question = questionBox.value.trim();
+            const chat = document.getElementById("chat");
+
+            if (!question) {
+                return;
+            }
+
+            chat.innerHTML += `
+                <div class="message user">
+                    <span class="label">You</span>
+                    ${question}
+                </div>
+            `;
+
+            chat.innerHTML += `
+                <div id="loading" class="message assistant loading">
+                    AI Assistant is thinking...
+                </div>
+            `;
+
+            questionBox.value = "";
+
+            const response = await fetch(
+                `http://127.0.0.1:8000/ask?question=${encodeURIComponent(question)}`
+            );
+
+            const data = await response.json();
+
+            document.getElementById("loading").remove();
+
+            chat.innerHTML += `
+                <div class="message assistant">
+                    <span class="label">AI Assistant</span>
+                    ${data.answer
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                    .replace(/\n/g, "<br>")}
+                </div>
+            `;
+
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function clearChat() {
+    const chat = document.getElementById("chat");
+
+    chat.innerHTML = `
+        <div class="message assistant">
+            <span class="label">AI Assistant</span>
+            Ask me a question about business, operations, planning, or documents.
+        </div>
+    `;
+}
+
+function handleKeyPress(event) {
+
+    if (event.key === "Enter" && !event.shiftKey) {
+
+        event.preventDefault();
+
+        askAI();
+    }
+}
+    </script>
+
+</body>
+</html>
