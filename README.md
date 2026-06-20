@@ -111,15 +111,56 @@ http://127.0.0.1:8000/frontend
 ```
 
 ---
+## Retrieval-Augmented Generation (RAG)
+
+The Local AI Knowledge Assistant now supports Retrieval-Augmented Generation (RAG), allowing users to ask questions about uploaded documents and receive grounded responses based on document content rather than general AI knowledge.
+
+### RAG Workflow
+
+```text
+PDF Document
+↓
+Text Extraction
+↓
+Document Chunking
+↓
+Sentence Embeddings
+↓
+FAISS Vector Database
+↓
+Semantic Search
+↓
+Llama 3.1 (Ollama)
+↓
+Answer + Source Citations
+```
+### Example Response
+
+![RAG Response with Sources](screenshots/screenshot_rag-with-sources.png)
 
 ## Future Enhancements
 
-- PDF document ingestion
-- Vector database integration
-- Retrieval-Augmented Generation (RAG)
-- Multi-document search
-- Source citation support
+- Multi-document knowledge base
+- PDF upload interface
+- Document management dashboard
+- Source document citations
+- Conversation memory
 - User authentication
+
+
+### Features
+
+* PDF document ingestion
+* Semantic search using FAISS
+* Local embeddings using Sentence Transformers
+* Grounded responses from document context
+* Source page citations
+* Fully local execution with Ollama and Llama 3.1
+
+### Example Response
+
+![RAG Response with Sources](screenshots/rag-with-sources.png)
+
 
 ---
 

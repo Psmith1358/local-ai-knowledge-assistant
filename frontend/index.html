@@ -170,7 +170,7 @@
             questionBox.value = "";
 
             const response = await fetch(
-                `http://127.0.0.1:8000/ask?question=${encodeURIComponent(question)}`
+            `http://127.0.0.1:8000/ask-document?question=${encodeURIComponent(question)}`
             );
 
             const data = await response.json();
@@ -181,8 +181,12 @@
                 <div class="message assistant">
                     <span class="label">AI Assistant</span>
                     ${data.answer
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                    .replace(/\n/g, "<br>")}
+                        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                        .replace(/\n/g, "<br>")}
+
+            <br><br>
+
+            <small><strong>Source:</strong> ${data.sources}</small>
                 </div>
             `;
 
