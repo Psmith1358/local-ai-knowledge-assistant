@@ -2,14 +2,31 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
+import os
 
 PDF_PATH = "data/SOP_Implementation_Success.pdf"
 VECTOR_DB_PATH = "vectorstore"
 
 print("Loading PDF...")
 
-loader = PyPDFLoader(PDF_PATH)
-documents = loader.load()
+all_documents = []
+
+for file in os.listdir("data"):
+    if file.endswith(".pdf"):
+        print(f"Loading {file}...")
+
+        loader = PyPDFLoader(
+            os.path.join("data", file)
+        )
+
+        docs = loader.load()
+
+        for doc in docs:
+            doc.metadata["source_file"] = file
+
+        all_documents.extend(docs)
+
+documents = all_documents
 
 print(f"Loaded {len(documents)} pages from the PDF.")
 

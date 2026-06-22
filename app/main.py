@@ -66,33 +66,44 @@ def ask_document(question: str):
     sources = []
 
     for doc in docs:
-        if "page" in doc.metadata:
-            sources.append(f"Page {doc.metadata['page'] + 1}")
+        source_file = doc.metadata.get(
+            "source_file",
+            "Unknown Document"
+        )
 
-    context = "\n\n".join([doc.page_content for doc in docs])
+        page = doc.metadata.get(
+            "page",
+            0
+        ) + 1
+
+        sources.append(
+            f"{source_file} (Page {page})"
+        )
     source_text = ", ".join(set(sources))
 
+    context = "\n\n".join([doc.page_content for doc in docs])
+
     prompt = f"""
-You are a concise, professional S&OP knowledge assistant.
+    You are a concise, professional S&OP knowledge assistant.
 
-Answer the user's question using only the provided document context.
-If the answer is not found in the context, say that the document does not provide enough information.
+    Answer the user's question using only the provided document context.
+    If the answer is not found in the context, say that the document does not provide enough information.
 
-Keep the answer clear, useful, and under 200 words.
+    Keep the answer clear, useful, and under 200 words.
 
-Document Context:
-{context}
+    Document Context:
+    {context}
 
-Question:
-{question}
-"""
+    Question:
+    {question}
+    """
 
     response = requests.post(
         "http://localhost:11434/api/generate",
-        json={
-            "model": "llama3.1",
-            "prompt": prompt,
-            "stream": False
+            json={
+                "model": "llama3.1",
+                "prompt": prompt,
+                "stream": False
         }
     )
 
