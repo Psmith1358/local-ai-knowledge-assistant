@@ -1,7 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import requests
+import shutil
+import subprocess
+import os
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -112,4 +115,60 @@ def ask_document(question: str):
     return {
         "answer": result["response"],
         "sources": source_text
+    }
+@app.post("/upload-document")
+async def upload_document(file: UploadFile = File(...)):
+    file_path = f"data/{file.filename}"
+
+    print("******** UPLOAD ENDPOINT HIT ********", flush=True)
+    print(f"Uploading file: {file.filename}", flush=True)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    print("******** REBUILDING VECTOR DATABASE ********", flush=True)
+
+    subprocess.run(
+        ["python", "build_vector_db.py"],
+        check=True
+    )
+
+    print("******** VECTOR DATABASE REBUILD COMPLETE ********", flush=True)
+
+    return {
+        "message": "Document uploaded successfully and knowledge base updated!",
+        "filename": file.filename
+    }
+@app.get("/documents")
+def list_documents():
+    files = []
+
+    for file in os.listdir("data"):
+        if file.endswith(".pdf"):
+            files.append(file)
+
+    return {
+        "documents": files
+    }
+@app.get("/delete-document")
+def delete_document(filename: str):
+
+    file_path = os.path.join("data", filename)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+        subprocess.run(
+            ["python", "build_vector_db.py"],
+            check=True
+        )
+
+        return {
+            "message":
+            "Document deleted and knowledge base updated."
+        }
+
+    return {
+        "message":
+        "Document not found."
     }
